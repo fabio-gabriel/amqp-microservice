@@ -1,18 +1,18 @@
 const express = require("express");
 const amqp = require("amqplib");
-const db = require("../db"); // Import the database module (adjust the path as needed)
+const db = require("../db");
 
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-  const { userName, type, status, purchaseDate } = req.body;
-  const connection = await amqp.connect("amqp://localhost"); // Replace with your RabbitMQ server URL
+  const { fullName } = req.body;
+  const connection = await amqp.connect("amqp://localhost");
   const channel = await connection.createChannel();
 
   try {
     // Send the notification message to the queue
     const queueName = "purchase_notifications";
-    const message = JSON.stringify({ userName, type, status, purchaseDate });
+    const message = JSON.stringify({ fullName });
     channel.sendToQueue(queueName, Buffer.from(message), {
       persistent: true,
     });
@@ -30,7 +30,7 @@ router.post("/", async (req, res) => {
 
 // Get all subscriptions
 router.get("/", (req, res) => {
-  db.all("SELECT * FROM subscriptions", (err, rows) => {
+  db.all("SELECT * FROM client", (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
@@ -45,7 +45,7 @@ router.get("/:id", (req, res) => {
   const subscriptionId = req.params.id;
 
   db.get(
-    "SELECT * FROM subscriptions WHERE id = ?",
+    "SELECT * FROM subscription WHERE id = ?",
     subscriptionId,
     (err, row) => {
       if (err) {
@@ -67,7 +67,7 @@ router.get("/:id", (req, res) => {
 router.put("/:id/status", async (req, res) => {
   const subscriptionId = req.params.id;
   const { newStatus } = req.body;
-  const connection = await amqp.connect("amqp://localhost"); // Replace with your RabbitMQ server URL
+  const connection = await amqp.connect("amqp://localhost");
   const channel = await connection.createChannel();
 
   try {
@@ -132,7 +132,7 @@ router.put("/subscriptions/:id", (req, res) => {
 // Delete a subscription by ID
 router.delete("/:id", async (req, res) => {
   const subscriptionId = req.params.id;
-  const connection = await amqp.connect("amqp://localhost"); // Replace with your RabbitMQ server URL
+  const connection = await amqp.connect("amqp://localhost");
   const channel = await connection.createChannel();
 
   try {
