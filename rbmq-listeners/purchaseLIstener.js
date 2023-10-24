@@ -58,5 +58,4 @@ async function startPurchaseListener() {
     console.error("Error starting Purchase Listener:", error);
   }
 }
-("INSERT INTO subscriptions (userName, type, status, purchaseDate) VALUES (?, ?, ?, ?)");
 startPurchaseListener();

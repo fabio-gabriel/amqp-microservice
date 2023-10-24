@@ -28,9 +28,20 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get all subscriptions
+// Get all clients
 router.get("/", (req, res) => {
   db.all("SELECT * FROM client", (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+
+    res.json(rows);
+  });
+});
+
+router.get("/allsubs", (req, res) => {
+  db.all("SELECT * FROM subscription", (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
@@ -83,7 +94,7 @@ router.put("/:id/status", async (req, res) => {
     // ENVIAR O STATUS SÓ DEPOIS DE A MENSAGEM RECEBER O ACK
     // TESTAR ISSO DEPOIS
 
-    res.status(200).json({ message: "Subscription removed successfully" });
+    res.status(200).json({ message: "Subscription updated successfully" });
   } catch (error) {
     console.error("Error enqueuing notification:", error);
     res.status(500).json({ error: "Failed to enqueue notification" });
