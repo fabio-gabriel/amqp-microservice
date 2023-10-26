@@ -28,7 +28,6 @@ async function startPurchaseListener() {
           function (err) {
             const clientId = this.lastID;
             console.log("clientId: ", clientId);
-            setTimeout(() => {}, 1000);
 
             db.run(
               "INSERT INTO subscription (user_id) VALUES (?)",

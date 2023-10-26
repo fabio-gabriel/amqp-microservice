@@ -32,6 +32,37 @@ db.serialize(() => {
     )
   `);
 
+  db.run(`
+  CREATE TABLE IF NOT EXISTS activity_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subscription_id INTEGER,
+    status_id INTEGER,
+    type TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (subscription_id) REFERENCES subscription(id)
+  )
+`);
+
+  db.run(`
+  CREATE TRIGGER IF NOT EXISTS subscription_update_trigger
+  AFTER UPDATE ON subscription
+  BEGIN
+    INSERT INTO activity_history (subscription_id, status_id, type, created_at, updated_at)
+    SELECT
+      OLD.id,
+      OLD.status_id,
+      CASE
+        WHEN OLD.status_id = 1 AND NEW.status_id = 0 THEN 'canceled'
+        WHEN OLD.status_id = 0 AND NEW.status_id = 1 THEN 'renewed'
+        ELSE NULL
+      END,
+      OLD.created_at,
+      datetime('now')
+    WHERE NEW.status_id != OLD.status_id;
+  END;
+`);
+
   console.log("Tables created");
 });
 

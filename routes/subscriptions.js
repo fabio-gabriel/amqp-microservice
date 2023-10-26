@@ -17,10 +17,6 @@ router.post("/", async (req, res) => {
       persistent: true,
     });
 
-    // TODO:
-    // ENVIAR O STATUS SÓ DEPOIS DE A MENSAGEM RECEBER O ACK
-    // TESTAR ISSO DEPOIS
-
     res.status(201).json({ message: "Subscription added successfully" });
   } catch (error) {
     console.error("Error enqueuing notification:", error);
@@ -40,8 +36,8 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/allsubs", (req, res) => {
-  db.all("SELECT * FROM subscription", (err, rows) => {
+router.get("/history", (req, res) => {
+  db.all("SELECT * FROM activity_history", (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
@@ -83,16 +79,11 @@ router.put("/:id/status", async (req, res) => {
 
   try {
     // Send the notification message to the queue
-
     const queueName = "update_notifications";
     const message = JSON.stringify({ newStatus, subscriptionId });
     channel.sendToQueue(queueName, Buffer.from(message), {
       persistent: true,
     });
-
-    // TODO:
-    // ENVIAR O STATUS SÓ DEPOIS DE A MENSAGEM RECEBER O ACK
-    // TESTAR ISSO DEPOIS
 
     res.status(200).json({ message: "Subscription updated successfully" });
   } catch (error) {
@@ -100,45 +91,6 @@ router.put("/:id/status", async (req, res) => {
     res.status(500).json({ error: "Failed to enqueue notification" });
   }
 });
-
-// Update a subscription by ID
-/*
-router.put("/subscriptions/:id", (req, res) => {
-  const subscriptionId = req.params.id;
-  const updatedData = req.body;
-
-  // Build the SQL UPDATE statement based on the fields provided in the request
-  const fieldUpdates = [];
-  const fieldValues = [];
-
-  for (const field in updatedData) {
-    if (Object.prototype.hasOwnProperty.call(updatedData, field)) {
-      fieldUpdates.push(`${field} = ?`);
-      fieldValues.push(updatedData[field]);
-    }
-  }
-
-  if (fieldUpdates.length === 0) {
-    res
-      .status(400)
-      .json({ error: "No fields to update provided in the request." });
-    return;
-  }
-
-  const sql = `UPDATE subscriptions SET ${fieldUpdates.join(
-    ", "
-  )} WHERE id = ?`;
-  fieldValues.push(subscriptionId);
-
-  db.run(sql, fieldValues, (err) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json({ message: "Subscription data updated successfully" });
-    }
-  });
-});
-*/
 
 // Delete a subscription by ID
 router.delete("/:id", async (req, res) => {
