@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   const { fullName } = req.body;
-  const connection = await amqp.connect("amqp://localhost");
+  const connection = await amqp.connect("amqp://guest:guest@localhost:5672/");
   const channel = await connection.createChannel();
 
   try {
