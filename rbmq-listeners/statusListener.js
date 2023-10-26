@@ -3,7 +3,7 @@ const db = require("../db");
 
 async function startUpdateListener() {
   try {
-    const connection = await amqp.connect("amqp://guest:guest@localhost:5672/");
+    const connection = await amqp.connect("amqp://rabbitmq");
     const channel = await connection.createChannel();
 
     const queueName = "update_notifications";
@@ -21,7 +21,8 @@ async function startUpdateListener() {
 
       console.log("client:", subscriptionId, "status:", newStatus);
 
-      const sql = "UPDATE subscription SET status_id = ? WHERE user_id = ?";
+      const sql =
+        "UPDATE subscription SET status_id = ?, updated_at = CURRENT_TIMESTAMP  WHERE user_id = ?";
       db.run(sql, [newStatus, subscriptionId], (err) => {
         if (err) {
           console.log(

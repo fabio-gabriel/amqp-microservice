@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   const { fullName } = req.body;
-  const connection = await amqp.connect("amqp://guest:guest@localhost:5672/");
+  const connection = await amqp.connect("amqp://rabbitmq");
   const channel = await connection.createChannel();
 
   try {
@@ -74,7 +74,7 @@ router.get("/:id", (req, res) => {
 router.put("/:id/status", async (req, res) => {
   const subscriptionId = req.params.id;
   const { newStatus } = req.body;
-  const connection = await amqp.connect("amqp://localhost");
+  const connection = await amqp.connect("amqp://rabbitmq");
   const channel = await connection.createChannel();
 
   try {
@@ -95,7 +95,7 @@ router.put("/:id/status", async (req, res) => {
 // Delete a subscription by ID
 router.delete("/:id", async (req, res) => {
   const subscriptionId = req.params.id;
-  const connection = await amqp.connect("amqp://localhost");
+  const connection = await amqp.connect("amqp://rabbitmq");
   const channel = await connection.createChannel();
 
   try {

@@ -3,7 +3,7 @@ const db = require("../db");
 
 async function startPurchaseListener() {
   try {
-    const connection = await amqp.connect("amqp://guest:guest@localhost:5672/");
+    const connection = await amqp.connect("amqp://rabbitmq");
     const channel = await connection.createChannel();
 
     const queueName = "purchase_notifications";
